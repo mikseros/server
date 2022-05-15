@@ -1,6 +1,7 @@
 package com.mikseros.server.resource;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,8 @@ import com.mikseros.server.service.implementation.ServerServiceImpl;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -23,6 +25,7 @@ import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.CREATED;
 import static com.mikseros.server.enumeration.Status.SERVER_UP;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 // Technically it is controller
 @RestController
@@ -69,5 +72,36 @@ public class ServerResource {
 						.statusCode(CREATED.value())
 						.build()
 		);
+	}
+	
+	@GetMapping("/get/{id}")
+	public ResponseEntity<Response> getServer(@PathVariable("id") Long id) {
+		return ResponseEntity.ok(
+				Response.builder()
+						.timeStamp(now())
+						.data(Map.of("server", serverService.get(id)))
+						.message("Server retrieved")
+						.status(OK)
+						.statusCode(OK.value())
+						.build()
+		);
+	}
+	
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<Response> deleteServer(@PathVariable("id") Long id) {
+		return ResponseEntity.ok(
+				Response.builder()
+						.timeStamp(now())
+						.data(Map.of("deleted", serverService.delete(id)))
+						.message("Server deleted")
+						.status(OK)
+						.statusCode(OK.value())
+						.build()
+		);
+	}
+	
+	@GetMapping(path = "/image/{fileName}", produces = IMAGE_PNG_VALUE)
+	public byte[] getServerImage(@PathVariable("fileName") String fileName) throws IOException {
+		return Files.readAllBytes(Paths.get(System.getProperty("user.home") + "Downloads/images/" + fileName));
 	}
 }
